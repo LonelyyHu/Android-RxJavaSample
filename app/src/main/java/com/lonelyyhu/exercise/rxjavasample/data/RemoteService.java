@@ -19,14 +19,11 @@ import retrofit2.http.Query;
 
 public interface RemoteService {
 
-//    @GET("login")
-//    Call<SessionModel> login(@Query("username") String username, @Query("password") String password);
-
     @GET("login")
     Observable<SessionModel> login(@Query("username") String username, @Query("password") String password);
 
 
     @PUT("users/{objectId}")
-    Call<UpdateResult> updateUser(@Path("objectId") String objectId, @Body Map model);
+    Observable<UpdateResult> updateUser(@Path("objectId") String objectId, @Body Map model);
 
 }

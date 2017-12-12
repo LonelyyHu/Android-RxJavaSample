@@ -13,16 +13,31 @@ import com.lonelyyhu.exercise.rxjavasample.model.UpdateResult;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private CompositeDisposable mCompositeDisposable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mCompositeDisposable = new CompositeDisposable();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mCompositeDisposable.clear();
     }
 
     public void onClickUpdate(View view) {
@@ -35,27 +50,31 @@ public class MainActivity extends AppCompatActivity {
             Map<String, Object> updateData = new HashMap<>();
             updateData.put("timezone", 1);
 
-            Call<UpdateResult> call = service.updateUser(model.getObjectId(), updateData);
+            service.updateUser(model.getObjectId(), updateData)
+                    .subscribeOn(Schedulers.io())
+                    .unsubscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<UpdateResult>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            mCompositeDisposable.add(d);
+                        }
 
-            call.enqueue(new Callback<UpdateResult>() {
-                @Override
-                public void onResponse(Call<UpdateResult> call, Response<UpdateResult> response) {
+                        @Override
+                        public void onNext(UpdateResult updateResult) {
+                            Log.wtf("MainActivity", "onResponse =>"+updateResult.getUpdatedAt());
+                        }
 
-                    if (response.isSuccessful()) {
-                        UpdateResult result = response.body();
-                        Log.wtf("MainActivity", "onResponse =>"+result.getUpdatedAt());
-                    } else {
-                        Log.wtf("MainActivity", "onResponse fail");
-                    }
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.wtf("MainActivity", "onFailure =>"+e.getMessage());
+                        }
 
-
-                }
-
-                @Override
-                public void onFailure(Call<UpdateResult> call, Throwable t) {
-                    Log.wtf("MainActivity", "onFailure =>"+t.getMessage());
-                }
-            });
+                        @Override
+                        public void onComplete() {
+                            Log.wtf("MainActivity", "onComplete");
+                        }
+                    });
 
         }
 

@@ -37,6 +37,13 @@ public class LoginActivity extends AppCompatActivity {
         mCompositeDisposable = new CompositeDisposable();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mCompositeDisposable.clear();
+    }
+
     public void onLoginClick(View view) {
 
         EditText etUN = findViewById(R.id.et_username);
@@ -84,45 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-
-
-
-
-
-//        Call<SessionModel> call = service.login(etUN.getText().toString(), etPW.getText().toString());
-//
-//        call.enqueue(new Callback<SessionModel>() {
-//            @Override
-//            public void onResponse(Call<SessionModel> call, Response<SessionModel> response) {
-//
-//                if (response.isSuccessful()) {
-//
-//                    SessionModel model = response.body();
-//                    MyApplication application = (MyApplication) getApplication();
-//                    application.setSessionModel(model);
-//                    Log.wtf("LoginActivity", "model.getSessionToken() =>" + model.getSessionToken());
-//
-//                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//                    startActivity(intent);
-//
-//                } else {
-//                    Log.wtf("LoginActivity", "onResponse is not success !!");
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<SessionModel> call, Throwable t) {
-//                Log.wtf("LoginActivity", "onFailure =>" + t.getMessage());
-//            }
-//        });
-
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
 
-        mCompositeDisposable.clear();
-    }
 }
