@@ -60,12 +60,8 @@ public class LoginActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<SessionModel>() {
 
-                    Disposable disposable;
-
                     @Override
                     public void onSubscribe(Disposable d) {
-                        this.disposable = d;
-
                         mCompositeDisposable.add(d);
                     }
 
