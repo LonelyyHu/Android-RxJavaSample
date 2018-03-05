@@ -6,24 +6,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.lonelyyhu.exercise.rxjavasample.data.RemoteService;
 import com.lonelyyhu.exercise.rxjavasample.data.ServiceFactory;
 import com.lonelyyhu.exercise.rxjavasample.model.SessionModel;
 
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -90,4 +82,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    public void onTest(View view) {
+
+        Test.main(new String[0]);
+
+    }
 }
