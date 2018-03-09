@@ -1,10 +1,16 @@
 package com.lonelyyhu.exercise.rxjavasample;
 
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.io.IOException;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -18,31 +24,15 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class HTTPService {
 
-    public static final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/png");
+    private OkHttpClient okHttpClient;
+    private HttpLoggingInterceptor logging;
 
-    private static HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 
-    public static void main(String[] args) {
+    public HTTPService() {
+        logging= new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        String url = "";
-
-        File file = new File("test3.jpg");
-
-        if (file.exists()) {
-            System.out.println("exist!!");
-//            put(url, file);
-            System.out.println(file.toURI().toString());
-            System.out.println("mimeType:"+getMimeType(file));
-
-        } else {
-            System.out.println("ohoh!!");
-//            try {
-//                file.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-        }
-
+        okHttpClient = new OkHttpClient.Builder().addInterceptor(logging).build();
 
     }
 
@@ -51,25 +41,37 @@ public class HTTPService {
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension);
     }
 
-    public static void put(String url, File file) {
+    public Observable<Response> put(final String url, final File file) {
 
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        return Observable.create(new ObservableOnSubscribe<Response>() {
+            @Override
+            public void subscribe(final ObservableEmitter<Response> emitter) throws Exception {
+                String mimeType = getMimeType(file);
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging).build();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .put(RequestBody.create(MediaType.parse(mimeType), file))
+                        .build();
 
-        String mimeType = getMimeType(file);
+                Call call = okHttpClient.newCall(request);
 
-        Request request = new Request.Builder().url(url)
-                .put(RequestBody.create(MediaType.parse(mimeType), file))
-                .build();
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.wtf("HTTPService", "onFailure => ", e);
+                        emitter.onError(e);
+                    }
 
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.wtf("HTTPService", "onResponse => " + response.message());
+                        emitter.onNext(response);
+                        emitter.onComplete();
+                    }
+                });
+            }
+        });
 
-        try {
-            Response response = client.newCall(request).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }
