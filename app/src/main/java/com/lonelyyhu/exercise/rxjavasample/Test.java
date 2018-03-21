@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.reactivestreams.Subscriber;
+
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -25,6 +29,8 @@ import static android.content.ContentValues.TAG;
  */
 
 public class Test {
+
+    public static int countor = 0;
 
     public static void main(String[] args) {
 
@@ -118,26 +124,26 @@ public class Test {
                     }
                 })
 
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
 
 
                 .flatMap(new Function<String, ObservableSource<String>>() {
                     @Override
-                    public ObservableSource<String> apply(String s) throws Exception {
+                    public ObservableSource<String> apply(String str) throws Exception {
 
 //                        System.out.println(Thread.currentThread().getName()+" => run 3......");
                         Log.wtf("Test", Thread.currentThread().getName()+" => run 3......");
 
 
-                        getObserver().retry(10).subscribe(new Observer<String>() {
+                        Observer<String> observer = new Observer<String>() {
                             @Override
                             public void onSubscribe(Disposable d) {
-
+                                Log.wtf("Test", "Exception onSubscribe => ");
                             }
 
                             @Override
                             public void onNext(String s) {
-
+                                Log.wtf("Test", "Exception onNext => ");
                             }
 
                             @Override
@@ -149,15 +155,48 @@ public class Test {
                             public void onComplete() {
                                 Log.wtf("Test", "Exception onComplete => ");
                             }
-                        });
+                        };
+
+
+//                        getObserver().retry(10).subscribe();
+
+//                        getObserver().retryWhen(new Function<Observable<Throwable>, ObservableSource<?>>() {
+//                            @Override
+//                            public ObservableSource<?> apply(final Observable<Throwable> throwableObservable) throws Exception {
+////                                return throwableObservable.flatMap(new Function<Throwable, ObservableSource<?>>() {
+////                                    @Override
+////                                    public ObservableSource<?> apply(Throwable throwable) throws Exception {
+////                                        return Observable.interval(5, TimeUnit.SECONDS);
+////                                    }
+////                                });
+////                                return throwableObservable.delay(5, TimeUnit.SECONDS);
+//
+////                                return throwableObservable.flatMap(new Function<Throwable, ObservableSource<?>>() {
+////                                    @Override
+////                                    public ObservableSource<?> apply(Throwable throwable) throws Exception {
+////
+////                                        Thread.sleep(5000);
+////
+////                                        return throwableObservable;
+////                                    }
+////                                });
+//
+////                                return throwableObservable;
+//                            }
+//                        }).subscribe(observer);
 
 //                        throw new RuntimeException("error!!!!!");
 
-                        return Observable.just(s+"-3");
+                        return Observable.just(str+"-3");
+
+
+//                        return getObserver();
+
+
                     }
                 })
 
-                .observeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
 //                .retry(2)
 
                 .flatMap(new Function<String, ObservableSource<String>>() {
@@ -191,7 +230,8 @@ public class Test {
                     public void onComplete() {
 
                     }
-                });
+        });
+
     }
 
     public static Observable<String> getObserver() {
@@ -201,11 +241,16 @@ public class Test {
             public void subscribe(ObservableEmitter<String> e) throws Exception {
 
 //                System.out.println(Thread.currentThread().getName()+" => run exception......");
-                Log.wtf("Test", Thread.currentThread().getName()+" => run exception......");
+                Log.wtf("Test", Thread.currentThread().getName()+" => run exception......countor:"+countor);
 
-                Thread.sleep(1000);
+//                Thread.sleep(1000);
 
-                throw new RuntimeException("throw exception!!");
+                countor++;
+
+//                if (countor < 3) {
+//                    throw new RuntimeException("throw exception!!");
+//                }
+
             }
         });
 
